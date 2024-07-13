@@ -2,7 +2,8 @@ package postgres
 
 import (
 	"context"
-	"os"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"log"
 	"testing"
 	"time"
 
@@ -11,10 +12,8 @@ import (
 )
 
 var testStore = New(Config{
-	Database: os.Getenv("POSTGRES_DATABASE"),
-	Username: os.Getenv("POSTGRES_USERNAME"),
-	Password: os.Getenv("POSTGRES_PASSWORD"),
-	Reset:    true,
+	ConnectionURI: GetUrl(),
+	Reset:         true,
 })
 
 func Test_Postgres_Set(t *testing.T) {
@@ -208,4 +207,29 @@ func Benchmark_Postgres_SetAndDelete(b *testing.B) {
 	}
 
 	require.NoError(b, err)
+}
+
+func Test_Database_Setup(t *testing.T) {
+	config, err := pgxpool.ParseConfig(GetUrl())
+
+	if err != nil {
+		log.Fatalf("Unable to parse DATABASE_URL %v\n", err)
+	}
+
+	config.MaxConns = 2
+
+	pool, connectConfigErr := pgxpool.NewWithConfig(context.Background(), config)
+	if connectConfigErr != nil {
+		log.Fatalf("Unable to create connection pool: %v\n", err)
+	}
+	defer pool.Close()
+	cfg := Config{
+		ConnectionURI: GetUrl(),
+		Table:         "users.fiber_storage",
+		Reset:         false,
+		GCInterval:    1 * time.Minute,
+	}
+	store := New(cfg)
+	_ = store
+	store.checkSchema(cfg.Table)
 }
