@@ -1,4 +1,4 @@
-module github.com/connect-web/storage/postgres
+module github.com/connect-web/storageself/postgres
 
 go 1.20
 
