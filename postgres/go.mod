@@ -1,4 +1,4 @@
-module github.com/gofiber/storage/postgres/v3
+module github.com/connect-web/storage/postgres
 
 go 1.20
 

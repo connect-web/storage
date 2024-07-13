@@ -1,3 +1,3 @@
-module github.com/gofiber/storage
+module github.com/connect-web/storage
 
-go 1.19
+go 1.20
